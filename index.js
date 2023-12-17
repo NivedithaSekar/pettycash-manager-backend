@@ -1,17 +1,17 @@
 //Required framework/dependencies installation
-const express = require('express')
-const cors = require('cors'); 
-const bodyParser = require('body-parser');
-const router = require('./Router/router')
-const connectDB = require('./Database/db-connectivity')
+import express from 'express';
+import cors from 'cors'; 
+import { json } from 'body-parser';
+import router from './Router/router';
+import connectDB from './Database/db-connectivity';
 
 
 const app = express()
 const PORT = process.env.PORT || 4000;
 //enabling cross origin site interaction
 app.use(cors());
-//
-app.use(bodyParser.json());
+//body-parser.json() identifies and enables to process the request received as json object.
+app.use(json());
 //configuring api(parent) router
 app.use("/api",router);
 //Database connection establishment
