@@ -1,9 +1,10 @@
-const mongoose = require('mongoose');
+import { Schema, model } from 'mongoose';
 
-const capitalBalanceSchema = new mongoose.Schema({
-    userId: { type: mongoose.Schema.Types.ObjectId, ref: 'Users', required: true },
-    date: { type: Date, default: Date.now },
+const capitalBalanceSchema = new Schema({
+    userId: { type: Schema.Types.ObjectId, ref: 'Users', required: true },
+    createdAt: { type: Date, default: Date.now },
+    transaction: {type: Schema.Types.ObjectId, ref: 'Transactions', required: true },
     capitalBalance: { type: Number, default: 0 }
 })
 
-module.exports = mongoose.model('CapitalBalance', capitalBalanceSchema);
+export default model('CapitalBalance', capitalBalanceSchema);
