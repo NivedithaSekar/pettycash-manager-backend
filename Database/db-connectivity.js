@@ -1,14 +1,23 @@
-import { MongoClient } from "mongodb";
-import dotenv from 'dotenv';
+//Required framework/dependencies installation
+const dotenv = require('dotenv');
+const mongoose = require('mongoose')
 
-// Local Mongo URL
-const LOCAL_MONGO_URL = 'mongodb://localhost:27017';
+//dotenv config() to use the process environment variables declared via process.env.<<var_name>>.
+dotenv.config();
+const CLOUD_MONGO_URL = process.env.MONGODB_URI
 
-// Cloud Mongo URL // Todo: **Caution** Do Not Store Password in Codes
-//dotenv.config();
-//const CLOUD_MONGO_URL =
-//  `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASSWORD}@${process.env.DB_CLUSTER}.mongodb.net/?retryWrites=true&w=majority`
 
-const DbClient = new MongoClient(LOCAL_MONGO_URL);
 
-export default DbClient;
+const DbClient = async () => {
+    try {
+      await mongoose.connect(CLOUD_MONGO_URL,{
+        useNewUrlParser: true,
+        useUnifiedTopology: true
+      });
+      console.log('MongoDB connected');
+    } catch (error) {
+      console.error('MongoDB connection error:', error);
+    }
+  };
+
+  module.exports = DbClient;
