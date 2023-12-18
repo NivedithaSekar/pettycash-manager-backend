@@ -1,15 +1,23 @@
 //Router Configuration
-const express = require('express');
-const router = express.Router();
-const authenticationCheck = require('../Middleware/middleware')
-const userController = require('../Controller/userController')
+import { Router } from "express";
+const router = Router();
+//importing the middlewares and controllers -> To route the request to the correct controller function with middleware as configured.
+import authenticationCheck from "../Middleware/middleware.js";
+import { signup, login, getUserInfo } from "../Controller/userController.js";
+import { getBalance } from "../Controller/capitalController.js";
+import { addTransaction, editTransaction, deleteTransaction } from "../Controller/transactionController.js";
 
 //auth router
-router.post('/signup',userController.signup);
-router.post('/login',userController.login);
-router.get('/user/:userId', userController.getUserInfo);
+router.post("/signup", signup);
+router.post("/login", login);
+router.get("/user/:userId", getUserInfo);
 
 //capital router
-router.get('/balance',authenticationCheck,capitalController.getBalance)
+router.get("/balance", authenticationCheck, getBalance);
 
-module.exports = router;
+//Transaction router
+router.post("/transaction/new", authenticationCheck, addTransaction);
+router.put("/transaction/edit/:transactionId", authenticationCheck, editTransaction);
+router.delete("/transaction/delete/:transactionId", authenticationCheck, deleteTransaction)
+
+export default router;

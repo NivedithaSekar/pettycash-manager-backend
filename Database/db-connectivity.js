@@ -1,16 +1,16 @@
 //Required framework/dependencies installation
-const dotenv = require('dotenv');
-const mongoose = require('mongoose')
+import { config } from 'dotenv';
+import { connect } from 'mongoose';
 
 //dotenv config() to use the process environment variables declared via process.env.<<var_name>>.
-dotenv.config();
+config();
 const CLOUD_MONGO_URL = process.env.MONGODB_URI
 
 
 
 const DbClient = async () => {
     try {
-      await mongoose.connect(CLOUD_MONGO_URL,{
+      await connect(CLOUD_MONGO_URL,{
         useNewUrlParser: true,
         useUnifiedTopology: true
       });
@@ -20,4 +20,4 @@ const DbClient = async () => {
     }
   };
 
-  module.exports = DbClient;
+  export default DbClient;
