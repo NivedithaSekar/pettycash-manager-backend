@@ -8,18 +8,18 @@ config();
 
 export async function signup(req, res) {
     try {
-      const { name, email, password } = req.body;
-      const existingUser = await User.findOne({ email });
+      const { userName, emailId, password } = req.body;
+      const existingUser = await User.findOne({ emailId });
       if (existingUser) {
-        return res.status(409).json({ message: 'User with this email already exists.' });
+        return res.status(409).json({ message: 'User with this emailId already exists.' });
       }
   
       const salt = await genSalt(10);
       const hashedPassword = await hash(password, salt);
   
       const user = new User({
-        name,
-        email,
+        userName,
+        emailId,
         password: hashedPassword 
       });
   
@@ -33,14 +33,15 @@ export async function signup(req, res) {
 
   export async function login(req,res) {
     try {
-        const { email, password } = req.body;
-    
-        const user = await User.findOne({ email });
+        const { emailId, password } = req.body;
+        //console.log(emailId, password)
+        const user = await User.findOne({ emailId });
         if (!user) {
           return res.status(401).json({ message: 'Authentication failed. User not found.' });
         }
         
         const isPasswordValid = await compare(password, user.password);
+        //console.log(isPasswordValid)
         if (!isPasswordValid) {
           return res.status(401).json({ message: 'Authentication failed. Invalid password.' });
         }
