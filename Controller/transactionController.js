@@ -3,7 +3,7 @@ import {
   checkTransactionEligibility,
   updateCapitalBalance,
 } from "../Controller/capitalController.js";
-import { ObjectId } from "mongodb";
+import mongoose from "mongoose";
 
 export async function addTransaction(req, res) {
   try {
@@ -51,7 +51,7 @@ export async function editTransaction(req, res) {
       updatedQuery[key] = value;
     }
   }
-  updatedHistory.updatedAt = transactionDetail.updatedAt;
+  updatedHistory.updatedAt = new Date();
   updatedQuery.history = transactionDetail.history;
   updatedQuery.history.push(updatedHistory);
   updatedQuery.updatedAt = new Date();
@@ -76,23 +76,25 @@ export async function editTransaction(req, res) {
 export async function deleteTransaction(req, res) {
   const { transactionId } = req.params;
   try {
-    const deletedRecord = await Transactions.findByIdAndDelete(transactionId).then((transaction) =>
-        updateCapitalBalance(
-          transaction,
-          transaction.type == "FUND_IN"
-            ? -transaction.amount
-            : transaction.amount,
-          "DELETE"
-        )
-      );
-      res
-      .status(201)
-      .json({
-        message: "Transaction data deleted successfully",
-        deletedRecord,
-      })
+    const deletedRecord = await Transactions.findByIdAndDelete(
+      transactionId
+    ).then((transaction) =>
+      updateCapitalBalance(
+        transaction,
+        transaction.type == "FUND_IN"
+          ? -transaction.amount
+          : transaction.amount,
+        "DELETE"
+      )
+    );
+    res.status(201).json({
+      message: "Transaction data deleted successfully",
+      deletedRecord,
+    });
   } catch (error) {
-    res.status(404).json({ message: "No transaction found with given ID!", error });
+    res
+      .status(404)
+      .json({ message: "No transaction found with given ID!", error });
   }
 }
 
@@ -111,9 +113,86 @@ export async function getTransactionDetails(req, res) {
 
 export async function getAllTransactions(userId) {
   try {
-    const transactionDetails = await Transactions.find({userId:userId});
-    return transactionDetails
+    const transactionDetails = await Transactions.find({ userId: userId });
+    return transactionDetails;
   } catch (error) {
     return { message: "No user is found with given ID!" };
+  }
+}
+
+// //.group({
+//   _id: {
+//     type: '$type',
+//     year: '$year',
+//     category: '$category'
+//   },
+//   totalAmount: {
+//     $sum: '$amount'
+//   },
+//   year: {
+//     $first: '$year'
+//   },
+//   type: {
+//     $first: '$type'
+//   },
+//   category: {
+//     $first: '$category'
+//   }
+// })
+////
+
+export async function getChartData(req, res) {
+  const { userId } = req.query;
+  const { body: filterObj } = req;
+  let chartDetails;
+  try {
+    if (filterObj.filter === "month") {
+      chartDetails = await Transactions.aggregate([
+        { $match: { userId: new mongoose.Types.ObjectId(userId) } },
+        {
+          $addFields: {
+            year: { $year: "$createdAt" },
+            month: { $month: "$createdAt" },
+          },
+        },
+        {
+          $group: {
+            _id: { type: "$type", month: "$month", category:'$category' }, // //category:'$category'
+            totalAmount: { $sum: "$amount" },
+            year: { $first: "$year" },
+            month:{$first: "$month"},
+            type: { $first: "$type" },
+            category: { $first: "$category" },  //$push: "$category"  //$first: "$category"
+          },
+        },
+        { $project: { _id: 0 } },
+      ]);
+      }else{
+        chartDetails =  await Transactions.aggregate([
+          { $match: { userId: new mongoose.Types.ObjectId(userId) } },
+          {
+            $addFields: {
+              year: { $year: "$createdAt" },
+              month: { $month: "$createdAt" },
+            },
+          },
+          {
+            $group: {
+              _id: { type: "$type", year: "$year", category:'$category' }, // //category:'$category'
+              totalAmount: { $sum: "$amount" },
+              year: { $first: "$year" },
+              type: { $first: "$type" },
+              category: { $first: "$category" },  //$push: "$category"  //$first: "$category"
+            },
+          },
+          { $project: { _id: 0 } },
+        ])
+    }
+    res.status(201).json({
+      message: "Chart Data retrieved successfully",
+      chartDetails,
+    });
+  } catch (error) {
+    res.status(404).json({ message: "Unable to fetch data" });
   }
 }

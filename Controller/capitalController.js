@@ -3,8 +3,7 @@ import { getAllTransactions } from "./transactionController.js";
 
 export async function getBalance(req, res) {
   try {
-    const { userId } = req.body;
-    console.log(userId);
+    const { userId } = req.query;
     const capitalBalanceObj = await CapitalBalance.findOne({ userId: userId });
     const transactionDetails = await getAllTransactions(userId);
 
@@ -62,7 +61,7 @@ export async function updateCapitalBalance(transaction, balanceDifference = 0,tr
         }, 
       },
       { new: true }
-    ):(balanceDifference == 0)? await CapitalBalance.findOneAndUpdate(
+    ):(transactionType == "CREATE")? await CapitalBalance.findOneAndUpdate(
       { userId: transaction.userId },
       {
         $set: { updatedAt: new Date() }, //latest date updation
@@ -90,7 +89,7 @@ export async function updateCapitalBalance(transaction, balanceDifference = 0,tr
         //else, proceeds with updating the capital balance based on new transaction 
         $inc: {
           capitalBalance: balanceDifference
-          }, 
+        }, 
       },
       { new: true }
     )
