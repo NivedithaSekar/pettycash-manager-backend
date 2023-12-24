@@ -5,11 +5,13 @@ const router = Router();
 import authenticationCheck from "../Middleware/middleware.js";
 import { signup, login, getUserInfo } from "../Controller/userController.js";
 import { getBalance } from "../Controller/capitalController.js";
-import { addTransaction, editTransaction, deleteTransaction, getTransactionDetails } from "../Controller/transactionController.js";
+import { addTransaction, editTransaction, deleteTransaction, getTransactionDetails, getChartData } from "../Controller/transactionController.js";
+
+router.get("/",authenticationCheck);
 
 //auth router
-router.post("/signup", signup);
-router.post("/login", login);
+router.post("/auth/signup", signup);
+router.post("/auth/login", login);
 router.get("/user/:userId", getUserInfo);
 
 //capital router
@@ -17,8 +19,9 @@ router.get("/balance", authenticationCheck, getBalance);
 
 //Transaction router
 router.post("/transaction/new", authenticationCheck, addTransaction);
-router.get("/transaction/:transactionId", authenticationCheck, getTransactionDetails);
+router.get("/transaction/get/:transactionId", authenticationCheck, getTransactionDetails);
 router.put("/transaction/edit/:transactionId", authenticationCheck, editTransaction);
 router.delete("/transaction/delete/:transactionId", authenticationCheck, deleteTransaction)
+router.post("/transaction/getChartData", authenticationCheck, getChartData);
 
 export default router;
