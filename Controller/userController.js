@@ -22,8 +22,8 @@ export async function signup(req, res) {
         emailId,
         password: hashedPassword 
       });
-  
-      await user.save()
+
+      await user.save();
       const capitalBalanceAccount = await newUserCapitalBalanceSetup(user._id);
       res.status(201).json({ message: "User registered successfully. Please Login", user, capitalBalanceAccount});
     } catch (error) {
